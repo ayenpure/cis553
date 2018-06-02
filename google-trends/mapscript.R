@@ -35,7 +35,7 @@ ditch_the_axes <- theme(
   panel.grid = element_blank(),
   axis.title = element_blank()
 )
-windows.options(width=500, height=500)
+
 dim(analyzed)
 regionalPlot <- ggplot(data = analyzed) + 
                 geom_polygon(aes(x = long, y = lat, fill = value, group = group), color = "white") + 
