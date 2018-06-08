@@ -42,7 +42,7 @@ regionalPlot <- ggplot(data = analyzed) +
                 coord_fixed(1.3) +
                 theme_bw() +
                 ditch_the_axes
-
+regionalPlot
 png(filename="/home/abhishek/repositories/cis553/google-trends/regional.png")
 plot(regionalPlot)
 dev.off()

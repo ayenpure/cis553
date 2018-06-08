@@ -13,13 +13,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalDouble;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.gson.JsonArray;
@@ -52,19 +50,23 @@ class OverTimeData {
 	public double calculateMean() {
 		Collection<Double> values2 = values.values();
 		OptionalDouble average = values2.parallelStream().mapToDouble(a -> a).average();
-		double toReturn = average.getAsDouble();
-		System.out.println("Average : " + toReturn);
-		return toReturn;
+		return average.getAsDouble();
 	}
 
 	public double calculateMax() {
 		Collection<Double> values2 = values.values();
 		OptionalDouble max = values2.parallelStream().mapToDouble(a -> a).max();
 		double toReturn = max.getAsDouble();
-		System.out.println("Max : " + toReturn);
 		return toReturn;
 	}
 
+	public double calculateStandardDeviation() {
+		double mean = calculateMean(); 
+		Collection<Double> values2 = values.values();
+		OptionalDouble average = values2.parallelStream().mapToDouble(a -> Math.pow(a - mean, 2)).average();
+		return Math.sqrt(average.getAsDouble());
+	}
+	
 	public double calculateForEvent() {
 		List<Date> dateList = new ArrayList<Date>(values.keySet());
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -90,8 +92,7 @@ class OverTimeData {
 
 	@Override
 	public String toString() {
-		System.out.println("Processing : " + geoName);
-		return geoName + ", " + (calculateForEvent() - calculateMean());
+		return geoName + ", " + (calculateForEvent() - calculateStandardDeviation());
 	}
 }
 
@@ -214,23 +215,30 @@ public class ExtractPopularity {
 			ParseForGeoData(geoDataList, json);
 			WriteCSV(geoDataList);
 		} else {
+			System.out.println("Overall " + queryOverState(OvertimeCommand, "US"));
 			List<OverTimeData> overTimeDataList = new ArrayList<OverTimeData>();
 			for (String state : States.keySet()) {
-				List<String> specificCommand = new ArrayList<String>();
-				specificCommand.addAll(OvertimeCommand);
-				specificCommand.add(States.get(state));
-				// TODO : start and end dates
-				specificCommand.add(StartDate);
-				specificCommand.add(EndDate);
-				specificCommand.add(States.get(state));
-				String json = ExecuteProcess(specificCommand.toArray(new String[specificCommand.size()]));
-				ParseForOverTimeData(state, overTimeDataList, json);
+				try {Thread.sleep(1000);}
+				catch (InterruptedException e) {}
+				OverTimeData stateData = queryOverState(OvertimeCommand, States.get(state));
+				overTimeDataList.add(stateData);
 			}
 			WriteCSV(overTimeDataList);
 		}
 	}
 
-	private static void ParseForOverTimeData(String region, List<OverTimeData> overTimeDataList, String json) {
+	private static OverTimeData queryOverState(List<String> OvertimeCommand, String state) {
+		List<String> specificCommand = new ArrayList<String>();
+		specificCommand.addAll(OvertimeCommand);
+		specificCommand.add(state);
+		// TODO : start and end dates
+		specificCommand.add(StartDate);
+		specificCommand.add(EndDate);
+		String json = ExecuteProcess(specificCommand.toArray(new String[specificCommand.size()]));
+		return ParseForOverTimeData(state, json);
+	}
+
+	private static OverTimeData ParseForOverTimeData(String region, String json) {
 		SimpleDateFormat format = new SimpleDateFormat("MMM dd, yyyy");
 		JsonParser parser = new JsonParser();
 		try {
@@ -241,7 +249,7 @@ public class ExtractPopularity {
 				OverTimeData data = new OverTimeData();
 				for (JsonElement overTimeElement : overTimeArray) {
 					if (!overTimeElement.isJsonObject())
-						return;
+						return null;
 					JsonObject overTimeObject = overTimeElement.getAsJsonObject();
 					data.geoName = region.toLowerCase();
 					String dateString = overTimeObject.get("formattedTime").getAsString();
@@ -253,12 +261,13 @@ public class ExtractPopularity {
 					double value = overTimeObject.get("value").getAsDouble();
 					data.addValue(date, value);
 				}
-				overTimeDataList.add(data);
+				return data;
 			}
 		} catch (JsonSyntaxException e) {
 			System.err.println("Error occured : " + e.getMessage());
 			System.err.println(json);
 		}
+		return null;
 	}
 
 	private static void ParseForGeoData(List<GeoMapData> geoDataList, String json) {
