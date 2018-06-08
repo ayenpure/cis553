@@ -1,0 +1,29 @@
+Return on Investment Analysis for Advertising during the Super Bowl
+
+Purpose
+-To analyse the return on investment when spending multiple millions of dollors for advertising
+ during the superbowl or other such popular events.
+-Based on past experiences, and competing brand analysis
+
+Technologies
+-Google Trends : API available form npm, to query trends data
+-R maps and ggmaps packages : to plot data overlaid
+- Java : to pipeline the two tasks
+  - call node for executing the JS code for google trends
+  - parse the result and clean it for visualization and analysis
+  - call R for executing the plotting script
+
+Steps
+- variance, mean and event difference values
+- spend analysis
+
+Results
+- Key insights on few brands that advertised
+- Verdict on them
+
+Coming up
+- More statistical analysis and making calculated predicitions on window of opportunity
+- Providing a clean tool instead of this hacky 
+- Head to Head comparison against competing brands
+
+Thanks.
