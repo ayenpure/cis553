@@ -1,9 +1,9 @@
 'use strict';
 
 const args = process.argv;
-var brand = ['Toyota']
-var startDate = '2010-03-01'
-var endDate = '2010-04-01'
+var brand = 'Toyota'
+var startDate = '2017-08-01'
+var endDate = '2018-02-28'
 var loc = 'US-OR'
 
 if(args.length >= 3)
@@ -20,7 +20,7 @@ var googleTrends = require('/home/abhishek/node_modules/google-trends-api/lib/go
 googleTrends.interestOverTime({keyword: brand, 
   startTime: new Date(startDate), 
   endTime: new Date(endDate), 
-  granularTimeResolution: true,
+  //granularTimeResolution: true,
   geo: loc})
 .then((res) => {
   console.log(res);

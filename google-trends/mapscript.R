@@ -24,7 +24,7 @@ labs <- data.frame(
 #geom_point(data = labs, aes(x = long, y = lat), color = "yellow", size = 4)
 
 states <- map_data("state")
-processed <- read.csv(file ="/home/abhishek/repositories/cis553/google-trends/dataframe.csv", header = TRUE, sep = ",")
+processed <- read.csv(file ="/home/abhishek/repositories/cis553/google-trends/regional.csv", header = TRUE, sep = ",")
 analyzed <- inner_join(states, processed, by="region")
 
 ditch_the_axes <- theme(

@@ -206,7 +206,7 @@ public class ExtractPopularity {
 		String brand = args[1];
 
 		List<String> RegionalCommand = new ArrayList<String>(Arrays.asList(Command, Regional, brand));
-		// Analysis done 12 month time
+		// Analysis done 6 month time
 		List<String> OvertimeCommand = new ArrayList<String>(Arrays.asList(Command, OverTime, brand));
 
 		if (analysis == 1) {
@@ -221,6 +221,7 @@ public class ExtractPopularity {
 				try {Thread.sleep(1000);}
 				catch (InterruptedException e) {}
 				OverTimeData stateData = queryOverState(OvertimeCommand, States.get(state));
+				stateData.geoName = state.toLowerCase();
 				overTimeDataList.add(stateData);
 			}
 			WriteCSV(overTimeDataList);
@@ -228,6 +229,7 @@ public class ExtractPopularity {
 	}
 
 	private static OverTimeData queryOverState(List<String> OvertimeCommand, String state) {
+    System.out.println("Executing query for state : " + state);
 		List<String> specificCommand = new ArrayList<String>();
 		specificCommand.addAll(OvertimeCommand);
 		specificCommand.add(state);
@@ -235,10 +237,12 @@ public class ExtractPopularity {
 		specificCommand.add(StartDate);
 		specificCommand.add(EndDate);
 		String json = ExecuteProcess(specificCommand.toArray(new String[specificCommand.size()]));
+    System.out.println("Returned String : " + json);
 		return ParseForOverTimeData(state, json);
 	}
 
 	private static OverTimeData ParseForOverTimeData(String region, String json) {
+		//System.out.println(json);
 		SimpleDateFormat format = new SimpleDateFormat("MMM dd, yyyy");
 		JsonParser parser = new JsonParser();
 		try {
@@ -251,7 +255,6 @@ public class ExtractPopularity {
 					if (!overTimeElement.isJsonObject())
 						return null;
 					JsonObject overTimeObject = overTimeElement.getAsJsonObject();
-					data.geoName = region.toLowerCase();
 					String dateString = overTimeObject.get("formattedTime").getAsString();
 					Date date = null;
 					try {
